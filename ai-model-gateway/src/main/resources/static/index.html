@@ -719,12 +719,45 @@
         messageInput.focus();
     }
 
-    // 切换会话
-    function selectConversation(id) {
+    // 切换会话（从后端加载历史记录）
+    async function selectConversation(id) {
         currentConversationId = id;
         renderConversationList();
+        // 尝试从后端加载该会话的历史记录
+        await loadHistory(id);
         renderChatArea();
         messageInput.focus();
+    }
+
+    // 从后端加载会话历史记录
+    async function loadHistory(conversationId) {
+        if (!conversationId) return;
+        try {
+            const response = await fetch(`/api/v1/chat/memory/${encodeURIComponent(conversationId)}/history`);
+            if (!response.ok) {
+                throw new Error(`请求失败 (${response.status})`);
+            }
+            const history = await response.json();
+            // 转换为前端消息格式
+            const messages = history.map(item => {
+                const role = item.role === 'USER' || item.role === 'user' ? 'user' : 'ai';
+                return { role: role, text: item.content };
+            });
+            // 更新会话标题（取第一条用户消息）
+            const conv = conversations[conversationId];
+            if (conv) {
+                conv.messages = messages;
+                if (conv.title === '新对话' && messages.length > 0) {
+                    const firstUser = messages.find(m => m.role === 'user');
+                    if (firstUser) {
+                        conv.title = firstUser.text.length > 20 ? firstUser.text.slice(0, 20) + '...' : firstUser.text;
+                    }
+                }
+            }
+        } catch (e) {
+            // 加载历史失败时，保留前端本地消息
+            console.warn('加载历史记录失败:', e);
+        }
     }
 
     // 清空会话（调用后端）
@@ -761,6 +794,10 @@
                 <button class="del-btn" onclick="clearConversation('${id}')" title="清空会话">✕</button>
             `;
             item.onclick = (e) => {
+                if (e.target.classList.contains('del-btn')) return;
+                selectConversation(id);
+            };
+            item.ondblclick = (e) => {
                 if (e.target.classList.contains('del-btn')) return;
                 selectConversation(id);
             };

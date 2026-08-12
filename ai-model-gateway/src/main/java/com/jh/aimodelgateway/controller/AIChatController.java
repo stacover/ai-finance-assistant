@@ -1,11 +1,10 @@
 package com.jh.aimodelgateway.controller;
 
-import com.jh.aimodelgateway.dto.ChatRequest;
-import com.jh.aimodelgateway.dto.ChatResponse;
-import com.jh.aimodelgateway.dto.ConversationChatRequest;
-import com.jh.aimodelgateway.dto.TechnicalAnswer;
+import com.jh.aimodelgateway.dto.*;
 import com.jh.aimodelgateway.service.AIChatService;
+import com.jh.aimodelgateway.service.ChatHistoryService;
 import jakarta.validation.constraints.NotBlank;
+import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -23,6 +22,7 @@ import reactor.core.publisher.Flux;
 @RequiredArgsConstructor
 public class AIChatController {
   private final AIChatService aiChatService;
+  private final ChatHistoryService chatHistoryService;
 
   @PostMapping
   public ChatResponse chat(@Valid @RequestBody ChatRequest request) {
@@ -56,5 +56,10 @@ public class AIChatController {
   public ResponseEntity<Void> clearMemory(@PathVariable @NotBlank String conversationId) {
     aiChatService.clearMemory(conversationId);
     return ResponseEntity.noContent().build();
+  }
+
+  @GetMapping("/memory/{conversationId}/history")
+  public List<ChatHistoryResponse> history(@PathVariable String conversationId) {
+    return chatHistoryService.getChatHistory(conversationId);
   }
 }

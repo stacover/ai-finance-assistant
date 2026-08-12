@@ -24,6 +24,7 @@ public class AIChatService {
   private final ChatClient chatClient;
   private final MessageChatMemoryAdvisor messageChatMemoryAdvisor;
   private final ChatMemory chatMemory;
+  private final ChatHistoryService chatHistoryService;
 
   public ChatResponse chat(ChatRequest request) {
     String content = chatClient.prompt().user(request.message()).call().content();
@@ -58,6 +59,9 @@ public class AIChatService {
   }
 
   public ChatResponse chatWithMemory(ConversationChatRequest request) {
+    chatHistoryService.saveUserMessage(request.conversationId(), request.message());
+
+    long start = System.currentTimeMillis();
     String content =
         chatClient
             .prompt()
@@ -69,6 +73,9 @@ public class AIChatService {
             .user(request.message())
             .call()
             .content();
+    long end = System.currentTimeMillis();
+    chatHistoryService.saveAssistantMessage(
+        request.conversationId(), content, "deepseek-v4-flash", end - start);
     return new ChatResponse(content);
   }
 
