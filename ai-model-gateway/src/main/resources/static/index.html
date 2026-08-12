@@ -8,7 +8,7 @@
         :root {
             --primary: #1677ff;
             --primary-hover: #4096ff;
-            --bg: #f5f5f5;
+            --bg: #f0f2f5;
             --card-bg: #ffffff;
             --border: #e8e8e8;
             --text: #333333;
@@ -16,7 +16,10 @@
             --user-bubble: #1677ff;
             --ai-bubble: #f0f0f0;
             --danger: #ff4d4f;
+            --success: #52c41a;
+            --warning: #faad14;
             --radius: 12px;
+            --sidebar-width: 260px;
         }
 
         * {
@@ -29,54 +32,186 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: var(--bg);
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            overflow: hidden;
         }
 
-        .container {
-            width: 100%;
-            max-width: 800px;
+        .app {
+            display: flex;
             height: 100vh;
-            max-height: 100vh;
+        }
+
+        /* ==================== 侧边栏 ==================== */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #001529;
+            color: #fff;
             display: flex;
             flex-direction: column;
-            background: var(--card-bg);
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+            flex-shrink: 0;
+            transition: width 0.3s;
         }
 
-        /* 顶部栏 */
+        .sidebar .brand {
+            padding: 20px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar .brand .logo {
+            width: 34px;
+            height: 34px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .sidebar .brand .name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .sidebar .new-chat-btn {
+            margin: 16px 16px 8px;
+            padding: 10px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .sidebar .new-chat-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .sidebar .section-title {
+            padding: 12px 20px 6px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 1px;
+        }
+
+        .sidebar .conversation-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 8px 8px;
+        }
+
+        .sidebar .conversation-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar .conversation-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        .sidebar .conversation-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 14px;
+            position: relative;
+        }
+
+        .sidebar .conversation-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar .conversation-item.active {
+            background: rgba(22, 119, 255, 0.3);
+        }
+
+        .sidebar .conversation-item .title {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar .conversation-item .del-btn {
+            opacity: 0;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        .sidebar .conversation-item:hover .del-btn {
+            opacity: 1;
+        }
+
+        .sidebar .conversation-item .del-btn:hover {
+            color: var(--danger);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar .footer {
+            padding: 12px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* ==================== 主区域 ==================== */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
         .header {
             padding: 16px 24px;
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
             gap: 12px;
+            background: var(--card-bg);
             flex-shrink: 0;
         }
 
-        .header .logo {
-            width: 36px;
-            height: 36px;
-            background: var(--primary);
-            border-radius: 10px;
+        .header .mode-tabs {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 18px;
-            font-weight: 700;
+            gap: 4px;
+            background: var(--bg);
+            padding: 4px;
+            border-radius: 8px;
         }
 
-        .header .title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .header .subtitle {
-            font-size: 12px;
+        .header .mode-tab {
+            padding: 6px 16px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            cursor: pointer;
+            font-size: 14px;
             color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .header .mode-tab.active {
+            background: var(--card-bg);
+            color: var(--primary);
+            font-weight: 600;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
         }
 
         .header .status {
@@ -85,17 +220,17 @@
             align-items: center;
             gap: 6px;
             font-size: 12px;
-            color: #52c41a;
+            color: var(--success);
         }
 
         .header .status .dot {
             width: 8px;
             height: 8px;
-            background: #52c41a;
+            background: var(--success);
             border-radius: 50%;
         }
 
-        /* 对话区域 */
+        /* ==================== 对话区域 ==================== */
         .chat-area {
             flex: 1;
             overflow-y: auto;
@@ -114,7 +249,6 @@
             border-radius: 3px;
         }
 
-        /* 欢迎消息 */
         .welcome {
             text-align: center;
             padding: 40px 20px;
@@ -161,7 +295,6 @@
             color: var(--primary);
         }
 
-        /* 消息气泡 */
         .message {
             display: flex;
             gap: 10px;
@@ -238,7 +371,6 @@
             text-align: right;
         }
 
-        /* Markdown 样式（AI 消息内） */
         .message.ai .bubble code {
             background: #e6e6e6;
             padding: 2px 6px;
@@ -262,7 +394,6 @@
             color: inherit;
         }
 
-        /* 打字动画 */
         .typing-indicator {
             display: flex;
             gap: 4px;
@@ -296,10 +427,88 @@
             }
         }
 
-        /* 输入区域 */
+        /* ==================== 结构化回答卡片 ==================== */
+        .structured-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .structured-card .card-section {
+            margin-bottom: 16px;
+        }
+
+        .structured-card .card-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .structured-card .section-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .structured-card .conclusion {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .structured-card .explanation {
+            font-size: 14px;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        .structured-card .key-points {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .structured-card .key-point {
+            display: flex;
+            gap: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .structured-card .key-point .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--primary);
+            border-radius: 50%;
+            margin-top: 8px;
+            flex-shrink: 0;
+        }
+
+        .copy-btn {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* ==================== 输入区域 ==================== */
         .input-area {
             padding: 16px 24px;
             border-top: 1px solid var(--border);
+            background: var(--card-bg);
             display: flex;
             gap: 10px;
             align-items: flex-end;
@@ -356,7 +565,6 @@
             transform: none;
         }
 
-        /* 错误提示 */
         .error-toast {
             position: fixed;
             top: 20px;
@@ -382,10 +590,31 @@
             }
         }
 
-        @media (max-width: 600px) {
-            .container {
-                max-width: 100%;
-                border-radius: 0;
+        /* ==================== 响应式 ==================== */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .sidebar .brand .name,
+            .sidebar .section-title,
+            .sidebar .conversation-item .title,
+            .sidebar .footer {
+                display: none;
+            }
+
+            .sidebar .conversation-item {
+                justify-content: center;
+            }
+
+            .sidebar .new-chat-btn {
+                font-size: 0;
+                padding: 10px;
+            }
+
+            .sidebar .new-chat-btn::after {
+                content: '+';
+                font-size: 18px;
             }
 
             .chat-area {
@@ -404,47 +633,60 @@
 </head>
 <body>
 
-<div class="container">
-    <!-- 顶部栏 -->
-    <div class="header">
-        <div class="logo">AI</div>
-        <div>
-            <div class="title">AI 金融助手</div>
-            <div class="subtitle">Powered by DeepSeek</div>
+<div class="app">
+    <!-- ==================== 侧边栏 ==================== -->
+    <div class="sidebar">
+        <div class="brand">
+            <div class="logo">AI</div>
+            <div class="name">AI 金融助手</div>
         </div>
-        <div class="status">
-            <span class="dot"></span>
-            在线
-        </div>
+        <button class="new-chat-btn" onclick="newConversation()">＋ 新建对话</button>
+        <div class="section-title">对话列表</div>
+        <div class="conversation-list" id="conversationList"></div>
+        <div class="footer">Powered by DeepSeek</div>
     </div>
 
-    <!-- 对话区域 -->
-    <div class="chat-area" id="chatArea">
-        <div class="welcome" id="welcome">
-            <div class="icon">🤖</div>
-            <h2>你好，我是 AI 金融助手</h2>
-            <p>我可以帮你分析股票行情、解读财经新闻、解答投资疑问</p>
-            <div class="suggestions">
-                <div class="suggestion" onclick="sendSuggestion('今天A股市场表现如何？')">📈 今日行情</div>
-                <div class="suggestion" onclick="sendSuggestion('请帮我分析一下新能源板块的投资前景')">🔋 板块分析</div>
-                <div class="suggestion" onclick="sendSuggestion('什么是量化交易？')">📚 概念解释</div>
-                <div class="suggestion" onclick="sendSuggestion('如何构建稳健的投资组合？')">💼 投资建议</div>
+    <!-- ==================== 主区域 ==================== -->
+    <div class="main">
+        <!-- 顶部栏 -->
+        <div class="header">
+            <div class="mode-tabs">
+                <button class="mode-tab active" data-mode="stream" onclick="switchMode('stream')">流式对话</button>
+                <button class="mode-tab" data-mode="structured" onclick="switchMode('structured')">结构化问答</button>
+            </div>
+            <div class="status">
+                <span class="dot"></span>
+                在线
             </div>
         </div>
-    </div>
 
-    <!-- 输入区域 -->
-    <div class="input-area">
-        <textarea
-                id="messageInput"
-                rows="1"
-                placeholder="输入你的问题，按 Enter 发送，Shift+Enter 换行"
-                onkeydown="handleKeyDown(event)"
-                oninput="autoResize(this)"
-        ></textarea>
-        <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="发送">
-            ➤
-        </button>
+        <!-- 对话区域 -->
+        <div class="chat-area" id="chatArea">
+            <div class="welcome" id="welcome">
+                <div class="icon">🤖</div>
+                <h2>你好，我是 AI 金融助手</h2>
+                <p>流式对话支持多轮记忆，结构化问答返回结论、原理和关键点</p>
+                <div class="suggestions">
+                    <div class="suggestion" onclick="sendSuggestion('今天A股市场表现如何？')">📈 今日行情</div>
+                    <div class="suggestion" onclick="sendSuggestion('请帮我分析一下新能源板块的投资前景')">🔋 板块分析
+                    </div>
+                    <div class="suggestion" onclick="sendSuggestion('什么是量化交易？')">📚 概念解释</div>
+                    <div class="suggestion" onclick="sendSuggestion('如何构建稳健的投资组合？')">💼 投资建议</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 输入区域 -->
+        <div class="input-area">
+            <textarea
+                    id="messageInput"
+                    rows="1"
+                    placeholder="输入你的问题，按 Enter 发送，Shift+Enter 换行"
+                    onkeydown="handleKeyDown(event)"
+                    oninput="autoResize(this)"
+            ></textarea>
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="发送">➤</button>
+        </div>
     </div>
 </div>
 
@@ -453,8 +695,116 @@
     const messageInput = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
     const welcome = document.getElementById('welcome');
+    const conversationList = document.getElementById('conversationList');
 
+    // ==================== 状态 ====================
+    let currentMode = 'stream';           // stream | structured
+    let currentConversationId = null;     // 当前会话 ID
+    let conversations = {};               // 会话列表 { id: {title, messages:[]} }
     let isSending = false;
+
+    // ==================== 会话管理 ====================
+
+    // 生成会话 ID
+    function genConversationId() {
+        return 'conv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+    }
+
+    // 新建对话
+    function newConversation() {
+        currentConversationId = genConversationId();
+        conversations[currentConversationId] = { title: '新对话', messages: [] };
+        renderConversationList();
+        renderChatArea(true);
+        messageInput.focus();
+    }
+
+    // 切换会话
+    function selectConversation(id) {
+        currentConversationId = id;
+        renderConversationList();
+        renderChatArea();
+        messageInput.focus();
+    }
+
+    // 清空会话（调用后端）
+    async function clearConversation(id) {
+        if (!id) return;
+        try {
+            await fetch(`/api/v1/chat/clearMemory/${encodeURIComponent(id)}`, { method: 'DELETE' });
+        } catch (e) {
+            // 清空失败不影响前端删除
+        }
+        conversations[id] = { title: '新对话', messages: [] };
+        if (id === currentConversationId) {
+            renderChatArea(true);
+        }
+        renderConversationList();
+    }
+
+    // 更新会话标题（取第一条用户消息）
+    function updateConversationTitle(id, message) {
+        const conv = conversations[id];
+        if (conv && conv.title === '新对话' && message) {
+            conv.title = message.length > 20 ? message.slice(0, 20) + '...' : message;
+        }
+    }
+
+    // 渲染会话列表
+    function renderConversationList() {
+        conversationList.innerHTML = '';
+        Object.keys(conversations).forEach(id => {
+            const item = document.createElement('div');
+            item.className = 'conversation-item' + (id === currentConversationId ? ' active' : '');
+            item.innerHTML = `
+                <span class="title">${escapeHtml(conversations[id].title)}</span>
+                <button class="del-btn" onclick="clearConversation('${id}')" title="清空会话">✕</button>
+            `;
+            item.onclick = (e) => {
+                if (e.target.classList.contains('del-btn')) return;
+                selectConversation(id);
+            };
+            conversationList.appendChild(item);
+        });
+        if (!conversationList.children.length) {
+            conversationList.innerHTML = '<div style="padding:12px;font-size:13px;color:rgba(255,255,255,0.4);text-align:center;">暂无对话</div>';
+        }
+    }
+
+    // 渲染对话区域
+    function renderChatArea(showWelcome = false) {
+        chatArea.innerHTML = '';
+        if (showWelcome || !currentConversationId) {
+            chatArea.appendChild(welcome);
+            welcome.style.display = 'block';
+            return;
+        }
+        const conv = conversations[currentConversationId];
+        if (!conv) return;
+        conv.messages.forEach(msg => {
+            if (msg.type === 'structured') {
+                appendStructured(msg);
+            } else {
+                appendMessage(msg.role, msg.text);
+            }
+        });
+        scrollToBottom();
+    }
+
+    // ==================== 模式切换 ====================
+
+    function switchMode(mode) {
+        currentMode = mode;
+        document.querySelectorAll('.mode-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.mode === mode);
+        });
+        messageInput.placeholder = mode === 'structured'
+            ? '输入技术问题，获取结构化回答（结论/原理/关键点）'
+            : '输入你的问题，按 Enter 发送，Shift+Enter 换行';
+        // 切换模式时保留当前会话的消息，但新建空白查看
+        renderChatArea();
+        messageInput.focus();
+    }
 
     // ==================== 发送消息 ====================
 
@@ -467,28 +817,91 @@
         const message = messageInput.value.trim();
         if (!message || isSending) return;
 
+        // 确保有会话
+        if (!currentConversationId) {
+            newConversation();
+        }
+        const convId = currentConversationId;
+
         isSending = true;
         sendBtn.disabled = true;
 
         // 隐藏欢迎消息
         if (welcome) welcome.style.display = 'none';
+        chatArea.innerHTML = '';
+        renderChatArea();
 
-        // 添加用户消息
+        // 记录用户消息
+        const userMsg = { role: 'user', text: message };
+        conversations[convId].messages.push(userMsg);
         appendMessage('user', message);
+        updateConversationTitle(convId, message);
 
-        // 清空输入框
-        messageInput.value = '';
-        messageInput.style.height = 'auto';
+        // 按模式调用
+        if (currentMode === 'structured') {
+            await sendStructured(message, convId);
+        } else {
+            await sendStream(message, convId);
+        }
 
-        // 添加 AI 消息占位（先显示打字动画）
+        renderConversationList();
+        isSending = false;
+        sendBtn.disabled = false;
+        messageInput.focus();
+    }
+
+    // ==================== 流式对话（带记忆） ====================
+
+    async function sendStream(message, convId) {
         const aiMsg = appendMessage('ai', '', true);
         const bubble = aiMsg.querySelector('.bubble');
         let fullText = '';
 
         try {
-            const response = await fetch('/api/v1/chat/stream', {
+            const response = await fetch('/api/v1/chat/memory', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'text/event-stream' },
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ conversationId: convId, message: message })
+            });
+
+            if (!response.ok) {
+                throw new Error(`请求失败 (${response.status})`);
+            }
+
+            const data = await response.json();
+            bubble.innerHTML = '';
+            fullText = data.message;
+            bubble.innerHTML = renderMarkdown(fullText);
+            scrollToBottom();
+
+            if (!fullText) {
+                bubble.innerHTML = '<span style="color:#999;">（未收到回复）</span>';
+            }
+
+            const time = document.createElement('div');
+            time.className = 'time';
+            time.textContent = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+            aiMsg.appendChild(time);
+
+            conversations[convId].messages.push({ role: 'ai', text: fullText });
+        } catch (error) {
+            bubble.innerHTML = '';
+            bubble.style.color = '#ff4d4f';
+            bubble.textContent = '抱歉，请求出错了：' + error.message;
+            showError('发送失败，请检查网络连接后重试');
+        }
+    }
+
+    // ==================== 结构化问答 ====================
+
+    async function sendStructured(message, convId) {
+        const aiMsg = appendMessage('ai', '', true);
+        const bubble = aiMsg.querySelector('.bubble');
+
+        try {
+            const response = await fetch('/api/v1/chat/structured', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: message })
             });
 
@@ -496,85 +909,34 @@
                 throw new Error(`请求失败 (${response.status})`);
             }
 
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder('utf-8');
-            let buffer = '';
-            let firstChunk = true;
+            const data = await response.json();
+            bubble.innerHTML = '';
+            aiMsg.remove();
 
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split('\n');
-                buffer = lines.pop();
-
-                for (const line of lines) {
-                    if (!line.startsWith('data:')) continue;
-
-                    const data = line.slice(5).trim();
-                    if (!data) continue;
-
-                    try {
-                        const parsed = JSON.parse(data);
-                        if (parsed.event === 'done') continue;
-                        if (parsed.event === 'error') {
-                            throw new Error(parsed.data || '模型调用失败');
-                        }
-                    } catch (e) {
-                        // 非 JSON 格式的 data，直接当文本处理
-                    }
-
-                    if (data === '[DONE]') continue;
-
-                    // 首次收到内容时，清除打字动画
-                    if (firstChunk) {
-                        bubble.innerHTML = '';
-                        firstChunk = false;
-                    }
-
-                    fullText += data;
-                    bubble.innerHTML = renderMarkdown(fullText);
-                    scrollToBottom();
-                }
-            }
-
-            // 流结束，如果没收到任何内容
-            if (!fullText) {
-                bubble.innerHTML = '<span style="color:#999;">（未收到回复）</span>';
-            }
-
-            // 补上时间戳
-            const time = document.createElement('div');
-            time.className = 'time';
-            time.textContent = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-            aiMsg.appendChild(time);
-
+            // 追加结构化卡片
+            const structuredData = { conclusion: data.conclusion, explanation: data.explanation, keyPoints: data.keyPoints };
+            conversations[convId].messages.push({ type: 'structured', ...structuredData });
+            appendStructured(structuredData);
+            scrollToBottom();
         } catch (error) {
             bubble.innerHTML = '';
             bubble.style.color = '#ff4d4f';
             bubble.textContent = '抱歉，请求出错了：' + error.message;
-            showError('发送失败，请检查网络连接后重试');
-        } finally {
-            isSending = false;
-            sendBtn.disabled = false;
-            messageInput.focus();
+            showError('结构化问答失败，请检查网络连接');
         }
     }
 
-    // ==================== 添加消息 ====================
+    // ==================== 添加普通消息 ====================
 
     function appendMessage(role, text, isTyping = false, isError = false) {
         const msgDiv = document.createElement('div');
         msgDiv.className = `message ${role}`;
 
-        // 头像
         const avatar = document.createElement('div');
         avatar.className = 'avatar';
         avatar.textContent = role === 'user' ? '我' : 'AI';
         msgDiv.appendChild(avatar);
 
-        // 气泡
         const bubble = document.createElement('div');
         bubble.className = 'bubble';
 
@@ -584,12 +946,10 @@
             bubble.style.color = '#ff4d4f';
             bubble.textContent = text;
         } else {
-            // 简单 Markdown 渲染
             bubble.innerHTML = renderMarkdown(text);
         }
         msgDiv.appendChild(bubble);
 
-        // 时间
         if (!isTyping) {
             const time = document.createElement('div');
             time.className = 'time';
@@ -602,38 +962,50 @@
         return msgDiv;
     }
 
+    // ==================== 添加结构化卡片 ====================
+
+    function appendStructured(data) {
+        const card = document.createElement('div');
+        card.className = 'structured-card';
+        card.innerHTML = `
+            <div class="card-section">
+                <div class="section-label">📌 结论</div>
+                <div class="conclusion">${escapeHtml(data.conclusion)}</div>
+            </div>
+            <div class="card-section">
+                <div class="section-label">💡 解释</div>
+                <div class="explanation">${escapeHtml(data.explanation)}</div>
+            </div>
+            <div class="card-section">
+                <div class="section-label">🔑 关键点</div>
+                <div class="key-points">
+                    ${data.keyPoints.map(p => `<div class="key-point"><span class="dot"></span><span>${escapeHtml(p)}</span></div>`).join('')}
+                </div>
+            </div>
+        `;
+        chatArea.appendChild(card);
+        scrollToBottom();
+    }
+
     // ==================== 简易 Markdown 渲染 ====================
 
     function renderMarkdown(text) {
-        // 代码块 ```
         text = text.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
             return `<pre><code>${escapeHtml(code.trim())}</code></pre>`;
         });
-
-        // 行内代码 `
         text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
-
-        // 粗体 **
         text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-
-        // 斜体 *
         text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
-
-        // 标题 ### 
         text = text.replace(/^### (.+)$/gm, '<h4>$1</h4>');
         text = text.replace(/^## (.+)$/gm, '<h3>$1</h3>');
         text = text.replace(/^# (.+)$/gm, '<h2>$1</h2>');
-
-        // 无序列表
         text = text.replace(/^- (.+)$/gm, '<li>$1</li>');
-
-        // 换行
         text = text.replace(/\n/g, '<br>');
-
         return text;
     }
 
     function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
         const div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;
@@ -665,8 +1037,8 @@
         setTimeout(() => toast.remove(), 3000);
     }
 
-    // 页面加载完成，聚焦输入框
-    messageInput.focus();
+    // 初始化：自动新建一个对话
+    newConversation();
 </script>
 
 </body>

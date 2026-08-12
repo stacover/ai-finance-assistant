@@ -1,19 +1,24 @@
 package com.jh.aimodelgateway.config;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.ChatMemoryRepository;
+import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * @author jinhang
  * @since 2026/8/3 23:05
- **/
-
+ */
 @Configuration
 public class AiModelConfig {
-    private static final String SYSTEM_PROMPT = """
+  private static final String SYSTEM_PROMPT =
+      """
             你是一名面向 Java 后端开发工程师的 AI 技术导师。
-            
+
             回答时必须遵守以下规则：
             1. 使用中文回答。
             2. 先给出结论，再解释原因。
@@ -24,9 +29,26 @@ public class AiModelConfig {
             7. 默认将回答控制在 800 字以内，除非用户要求详细说明。
             """;
 
-    @Bean
-    public ChatClient chatClient(ChatClient.Builder builder) {
-        return builder
-                .defaultSystem(SYSTEM_PROMPT).build();
-    }
+  @Bean
+  public ChatClient chatClient(ChatClient.Builder builder) {
+    return builder.defaultSystem(SYSTEM_PROMPT).build();
+  }
+
+  @Bean
+  public ChatMemoryRepository chatMemoryRepository() {
+    return new InMemoryChatMemoryRepository();
+  }
+
+  @Bean
+  public ChatMemory chatMemory(ChatMemoryRepository chatMemoryRepository) {
+    return MessageWindowChatMemory.builder()
+        .chatMemoryRepository(chatMemoryRepository)
+        .maxMessages(10)
+        .build();
+  }
+
+  @Bean
+  public MessageChatMemoryAdvisor messageChatMemoryAdvisor(ChatMemory chatMemory) {
+    return MessageChatMemoryAdvisor.builder(chatMemory).build();
+  }
 }
