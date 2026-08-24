@@ -1,20 +1,38 @@
 spring:
   application:
     name: ai-model-gateway
-  ai:
-    openai:
-      api-key: ${DEEPSEEK_API_KEY}
-      base-url: https://api.deepseek.com
-      chat:
-        options:
-          model: deepseek-chat
-          temperature: 0.7
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/ai_finance_assistant?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
-    username: root
-    password: ${MYSQL_PASSWORD}
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  config:
+    # 从 Nacos Config Server 拉取配置（优先于本地 application.yaml）
+    import:
+      - nacos:ai-model-gateway.yaml?group=DEFAULT_GROUP
+  cloud:
+    nacos:
+      # 注意：Spring Cloud Alibaba 2025.0.0.0 起，配置前缀由 spring.cloud.nacos 迁移为 spring.nacos
+      server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
+      discovery:
+        server-addr: ${spring.cloud.nacos.server-addr}
+        namespace: ${NACOS_NAMESPACE:}
+  nacos:
+    server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+    username: ${NACOS_USERNAME:nacos}
+    password: ${NACOS_PASSWORD:nacos}
+    config:
+      server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+      namespace: ${NACOS_NAMESPACE:}
+      group: DEFAULT_GROUP
+      file-extension: yaml
+      # 开启配置自动刷新
+      refresh-enabled: true
 
-mybatis-plus:
-  configuration:
-    map-underscore-to-camel-case: true
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh,health,info

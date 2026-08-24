@@ -230,6 +230,28 @@
             border-radius: 50%;
         }
 
+        .header .clear-memory-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .header .clear-memory-btn:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .header .clear-memory-btn:disabled {
+            color: #d9d9d9;
+            border-color: var(--border);
+            cursor: not-allowed;
+        }
+
         /* ==================== 对话区域 ==================== */
         .chat-area {
             flex: 1;
@@ -658,6 +680,7 @@
                 <span class="dot"></span>
                 在线
             </div>
+            <button class="clear-memory-btn" onclick="clearMemoryOnly()" title="清空当前会话的记忆">🧹 清空记忆</button>
         </div>
 
         <!-- 对话区域 -->
@@ -773,6 +796,26 @@
             renderChatArea(true);
         }
         renderConversationList();
+    }
+
+    // 仅清空当前会话的后端记忆（保留本地消息）
+    async function clearMemoryOnly() {
+        if (!currentConversationId) return;
+        const convId = currentConversationId;
+        if (!window.confirm('确定要清空当前对话的记忆吗？此操作不可恢复。')) return;
+        const btn = document.querySelector('.clear-memory-btn');
+        if (btn) btn.disabled = true;
+        try {
+            const response = await fetch(`/api/v1/chat/clearMemory/${encodeURIComponent(convId)}`, { method: 'DELETE' });
+            if (!response.ok) {
+                throw new Error(`请求失败 (${response.status})`);
+            }
+            window.alert('已清空当前对话的记忆');
+        } catch (e) {
+            showError('清空记忆失败，请稍后重试');
+        } finally {
+            if (btn) btn.disabled = false;
+        }
     }
 
     // 更新会话标题（取第一条用户消息）

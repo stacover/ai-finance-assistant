@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: config-center
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  config:
+    # 配置中心自身也接入 Nacos Config，可读取公共配置（如数据库、redis 等）
+    import:
+      - optional:nacos:${spring.application.name}.yaml?group=DEFAULT_GROUP
+  cloud:
+    nacos:
+      server-addr: ${NACOS_SERVER_ADDR:127.0.0.1:8848}
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
+      discovery:
+        server-addr: ${spring.cloud.nacos.server-addr}
+        namespace: ${NACOS_NAMESPACE:}
+      config:
+        server-addr: ${spring.cloud.nacos.server-addr}
+        namespace: ${NACOS_NAMESPACE:}
+        group: DEFAULT_GROUP
+        file-extension: yaml
+        # 开启配置自动刷新
+        refresh-enabled: true
+
+server:
+  port: ${CONFIG_CENTER_PORT:8002}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh,health,info

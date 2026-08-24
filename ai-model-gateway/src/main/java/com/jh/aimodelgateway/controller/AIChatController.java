@@ -25,7 +25,7 @@ public class AIChatController {
   private final ChatHistoryService chatHistoryService;
 
   @PostMapping
-  public ChatResponse chat(@Valid @RequestBody ChatRequest request) {
+  public AIChatResponse chat(@Valid @RequestBody ChatRequest request) {
     return aiChatService.chat(request);
   }
 
@@ -48,7 +48,7 @@ public class AIChatController {
   }
 
   @PostMapping("/memory")
-  public ChatResponse memoryChat(@Valid @RequestBody ConversationChatRequest request) {
+  public AIChatResponse memoryChat(@Valid @RequestBody ConversationChatRequest request) {
     return aiChatService.chatWithMemory(request);
   }
 

@@ -36,8 +36,14 @@ public class AIMessage {
   @TableField("output_tokens")
   private Integer outputTokens;
 
+  @TableField("total_tokens")
+  private Integer totalTokens;
+
   @TableField("duration_ms")
   private Long durationMs;
+
+  @TableField("finish_reason")
+  private String finishReason;
 
   @TableField("create_time")
   private LocalDateTime createTime;

@@ -1,6 +1,7 @@
 package com.jh.aimodelgateway.service;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.jh.aimodelgateway.dto.AiCallMetadata;
 import com.jh.aimodelgateway.dto.ChatHistoryResponse;
 import com.jh.aimodelgateway.entity.AIConversation;
 import com.jh.aimodelgateway.entity.AIMessage;
@@ -46,14 +47,18 @@ public class ChatHistoryService {
   }
 
   public void saveAssistantMessage(
-      String conversationId, String content, String model, Long durationMs) {
+      String conversationId, String content, AiCallMetadata metadata) {
     AIMessage message = new AIMessage();
 
     message.setConversationId(conversationId);
     message.setRole("ASSISTANT");
     message.setContent(content);
-    message.setModel(model);
-    message.setDurationMs(durationMs);
+    message.setModel(metadata.model());
+    message.setInputTokens(metadata.inputTokens());
+    message.setOutputTokens(metadata.outputTokens());
+    message.setTotalTokens(metadata.totalTokens());
+    message.setFinishReason(metadata.finishReason());
+    message.setDurationMs(metadata.durationMs());
 
     messageService.save(message);
   }
