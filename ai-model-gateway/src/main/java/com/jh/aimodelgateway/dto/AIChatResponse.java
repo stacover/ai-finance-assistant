@@ -5,5 +5,5 @@ package com.jh.aimodelgateway.dto;
  * @since 2026/8/3 22:11
  **/
 
-public record ChatResponse(String message) {
+public record AIChatResponse(String message) {
 }
