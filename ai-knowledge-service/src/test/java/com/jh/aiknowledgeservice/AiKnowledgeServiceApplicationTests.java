@@ -1,13 +1,11 @@
-package com.jh.aifinanceassistant;
+package com.jh.aiknowledgeservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class AiFinanceAssistantApplicationTests {
+class AiKnowledgeServiceApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
-
+  @Test
+  void contextLoads() {}
 }

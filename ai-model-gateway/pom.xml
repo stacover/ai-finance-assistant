@@ -10,9 +10,6 @@
     <artifactId>ai-model-gateway</artifactId>
     <name>ai-model-gateway</name>
     <description>ai-model-gateway</description>
-    <properties>
-        <java.version>17</java.version>
-    </properties>
     <dependencies>
 
         <dependency>
@@ -79,14 +76,5 @@
             <artifactId>hutool-all</artifactId>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>
