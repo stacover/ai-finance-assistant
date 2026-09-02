@@ -6,6 +6,15 @@ spring:
     multipart:
       max-file-size: 20MB
       max-request-size: 20MB
+  ai:
+    model:
+      embedding: ollama
 
+    ollama:
+      base-url: http://localhost:11434
+
+      embedding:
+        options:
+          model: bge-m3
 server:
   port: 8081

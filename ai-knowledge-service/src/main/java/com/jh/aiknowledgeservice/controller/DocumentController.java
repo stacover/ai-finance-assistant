@@ -2,13 +2,13 @@ package com.jh.aiknowledgeservice.controller;
 
 import com.jh.aiknowledgeservice.dto.DocumentChunkResponse;
 import com.jh.aiknowledgeservice.dto.DocumentParseResponse;
+import com.jh.aiknowledgeservice.dto.DocumentSearchResult;
 import com.jh.aiknowledgeservice.service.DocumentService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 /**
  * @author jinhang
@@ -34,5 +34,22 @@ public class DocumentController {
             @RequestPart("file") MultipartFile file
     ) {
         return documentService.chunks(file);
+    }
+
+    @PostMapping(
+            value = "/search",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public List<DocumentSearchResult> search(
+            @RequestPart("file") MultipartFile file,
+            @RequestParam String query,
+            @RequestParam(defaultValue = "3") int topK
+    ) {
+
+        return documentService.search(
+                file,
+                query,
+                topK
+        );
     }
 }
