@@ -1,5 +1,6 @@
 package com.jh.financeResearchAgent.controller;
 
+import com.jh.financeResearchAgent.agent.AgentRunResult;
 import com.jh.financeResearchAgent.agent.AgentService;
 import org.springframework.web.bind.annotation.RequestBody;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ public class AgentController {
   private final AgentService agentService;
 
   @PostMapping("/chat")
-  public String chat(@RequestBody AgentRequest request) {
+  public AgentRunResult chat(@RequestBody AgentRequest request) {
     return agentService.run(request.message());
   }
 
