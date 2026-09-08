@@ -155,8 +155,7 @@ public class AgentService {
             """),
             new UserMessage(userQuery));
 
-    Prompt prompt = new Prompt(messages, chatOptions);
-    return prompt;
+    return new Prompt(messages, chatOptions);
   }
 
   private void logToolCalls(int step, ChatResponse response) {
