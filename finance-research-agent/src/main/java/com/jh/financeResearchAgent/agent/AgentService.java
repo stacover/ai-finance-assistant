@@ -1,5 +1,8 @@
 package com.jh.financeResearchAgent.agent;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +31,7 @@ public class AgentService {
   private final ChatModel chatModel;
   private final ToolCallingManager toolCallingManager;
   private final ToolCallback[] toolCallbacks;
+  private final ObjectMapper objectMapper;
 
   public AgentRunResult run(String userQuery) {
     AgentTrace agentTrace = new AgentTrace(userQuery);
@@ -78,7 +82,8 @@ public class AgentService {
 
       for (int j = 0; j < toolCalls.size(); j++) {
         var toolCall = toolCalls.get(j);
-        String observation = observations.get(toolCall.name());
+        String observation = observations.get(toolCall.id());
+        ObservationOutcome outcome = parseObservation(observation);
         agentTrace.addStep(
             new AgentStep(
                 i + 1, // roundNumber
@@ -87,13 +92,49 @@ public class AgentService {
                 toolCall.arguments(),
                 observation,
                 batchDurationMs,
-                StepStatus.SUCCESS,
-                null));
+                outcome.status(),
+                outcome.errorMessage()));
       }
       prompt = new Prompt(executionResult.conversationHistory(), chatOptions);
     }
     throw new IllegalStateException("Agent exceeded max steps: " + MAX_STEPS);
   }
+
+  // 解析只影响 Trace 状态；原始 observation 仍保留供排查和后续模型调用使用。
+  private ObservationOutcome parseObservation(String observation) {
+    if (observation == null || observation.isBlank()) {
+      return new ObservationOutcome(StepStatus.FAILED, "工具返回结果缺失或为空");
+    }
+
+    final JsonNode result;
+    try {
+      result = objectMapper.readTree(observation);
+    } catch (JsonProcessingException e) {
+      log.warn("Failed to parse tool observation as JSON");
+      return new ObservationOutcome(StepStatus.FAILED, "工具返回结果不是合法 JSON");
+    }
+
+    if (result == null || !result.isObject()) {
+      return new ObservationOutcome(StepStatus.FAILED, "工具返回结果必须是 JSON 对象");
+    }
+    JsonNode status = result.path("status");
+    if (!status.isTextual() || status.asText().isBlank()) {
+      return new ObservationOutcome(StepStatus.FAILED, "工具返回结果缺少有效的 status 字段");
+    }
+
+    return switch (status.asText()) {
+      case "SUCCESS" -> new ObservationOutcome(StepStatus.SUCCESS, null);
+      case "FAILURE" -> {
+        JsonNode message = result.path("message");
+        String errorMessage = message.isTextual() && !message.asText().isBlank()
+            ? message.asText() : "工具执行失败，未提供错误说明";
+        yield new ObservationOutcome(StepStatus.FAILED, errorMessage);
+      }
+      default -> new ObservationOutcome(StepStatus.FAILED, "未知工具状态：" + status.asText());
+    };
+  }
+
+  private record ObservationOutcome(StepStatus status, String errorMessage) {}
 
   private Map<String, String> extractObservations(ToolExecutionResult executionResult) {
 
@@ -112,7 +153,7 @@ public class AgentService {
         return toolResponseMessage.getResponses().stream()
             .collect(
                 Collectors.toMap(
-                    ToolResponseMessage.ToolResponse::name,
+                    ToolResponseMessage.ToolResponse::id,
                     ToolResponseMessage.ToolResponse::responseData,
                     (oldValue, newValue) -> newValue));
       }

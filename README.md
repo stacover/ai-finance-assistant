@@ -1,4 +1,17 @@
-# 配置中心（Nacos）使用说明
+# AI Finance Assistant
+
+面向学习与求职展示的 Java 金融研究 Agent 项目，包含模型网关、知识库、研究 Agent 和配置中心四个模块。
+
+## 学习与项目记录
+
+- [学习路线与实施计划](docs/superpowers/plans/2026-09-16-learning-roadmap.md)：阶段目标、分工、验收条件和下一项核心任务。
+- [项目进度与学习进度](docs/learning/PROGRESS.md)：当前实现、验证证据、知识掌握情况及待处理问题。
+- [学习与开发会话日志](docs/learning/SESSION_LOG.md)：每次推进的贡献、验证范围和后续任务。
+- [协作约定](AGENTS.md)：助手负责基础代码，用户实践 Agent 核心逻辑。
+
+当前已完成工具调用 ID 关联和 Trace 状态解析的 17 项回归测试；真实模型与真实行情联调尚未在本次学习记录中验收。详细状态以进度看板为准。
+
+## 配置中心（Nacos）使用说明
 
 本项目采用 **Nacos Config Server** 作为统一配置中心，集中管理 `DEEPSEEK_API_KEY`、`MYSQL_PASSWORD` 等敏感配置，并支持动态刷新。
 
