@@ -39,7 +39,7 @@ public class AgentService {
     Prompt prompt = buildInitialPrompt(userQuery, chatOptions);
     for (int i = 0; i < MAX_STEPS; i++) {
       ChatResponse chatResponse = chatModel.call(prompt);
-      log.info("===== Agent Step {} =====", i + 1);
+      log.info("===== Agent Round {} =====", i + 1);
       log.info("hasToolCalls = {}", chatResponse.hasToolCalls());
       if (!chatResponse.hasToolCalls()) {
         if (chatResponse.getResult() == null) {
@@ -48,15 +48,15 @@ public class AgentService {
         String answer = chatResponse.getResult().getOutput().getText();
         return new AgentRunResult(answer, agentTrace);
       }
-      long start = System.currentTimeMillis();
       List<AssistantMessage.ToolCall> toolCalls =
           chatResponse.getResult().getOutput().getToolCalls();
-      logToolCalls(i, chatResponse);
+      logToolCalls(i + 1, chatResponse);
       ToolExecutionResult executionResult;
+      long batchStartTime = System.currentTimeMillis();
       try {
         executionResult = toolCallingManager.executeToolCalls(prompt, chatResponse);
       } catch (Exception e) {
-        long duration = System.currentTimeMillis() - start;
+        long batchDurationMs = System.currentTimeMillis() - batchStartTime;
         for (int j = 0; j < toolCalls.size(); j++) {
           var toolCall = toolCalls.get(j);
           agentTrace.addStep(
@@ -66,13 +66,13 @@ public class AgentService {
                   toolCall.name(),
                   toolCall.arguments(),
                   null,
-                  duration,
+                  batchDurationMs,
                   StepStatus.FAILED,
                   e.getMessage()));
         }
         throw e;
       }
-      long duration = System.currentTimeMillis() - start;
+      long batchDurationMs = System.currentTimeMillis() - batchStartTime;
 
       Map<String, String> observations = extractObservations(executionResult);
 
@@ -86,7 +86,7 @@ public class AgentService {
                 toolCall.name(),
                 toolCall.arguments(),
                 observation,
-                duration,
+                batchDurationMs,
                 StepStatus.SUCCESS,
                 null));
       }
@@ -127,38 +127,51 @@ public class AgentService {
         List.of(
             new SystemMessage(
                 """
-            你是一个金融市场研究 Agent。
+                你是一个金融市场研究 Agent。
 
-                    你的任务不是简单回答用户问题，
-                    而是根据已有信息逐步调查并形成有依据的分析。
+                你的任务不是简单回答用户问题，
+                而是根据已有信息逐步调查并形成有依据的分析。
 
-                    规则：
+                规则：
+                1. 涉及行情、资金、成分股等事实数据时，
+                   必须优先通过工具获取，不允许自行编造。
 
-                    1. 涉及行情、资金、成分股等事实数据时，
-                       必须优先通过工具获取，不允许自行编造。
+                2. 每次获得工具结果后，
+                   判断当前信息是否足以回答用户问题。
 
-                    2. 每次获得工具结果后，
-                       判断当前信息是否足以回答用户问题。
+                3. 如果信息不足，
+                   应继续选择最有价值的工具获取数据。
 
-                    3. 如果信息不足，
-                       应继续选择最有价值的工具获取数据。
+                4. 不要为了调用工具而调用工具，
+                   已有信息足够时应停止调查。
 
-                    4. 不要为了调用工具而调用工具，
-                       已有信息足够时应停止调查。
+                5. 必须区分：
+                   - 已获取事实
+                   - 基于事实的推断
+                   - 当前无法确认的信息
 
-                    5. 必须区分：
-                       - 已获取事实
-                       - 基于事实的推断
-                       - 当前无法确认的信息
+                6. 最终回答必须基于实际工具结果。
 
-                    6. 最终回答必须基于实际工具结果。
-            """),
+                工具失败规则：
+                1. Tool 返回 FAILED 时，不得将失败结果视为业务数据。
+
+                2. 不要因为 retriable=true 而自行重复调用完全相同的 Tool。
+                   网络超时等技术性重试由系统 Runtime 负责。
+
+                3. 如果存在其他能够获取等价数据的 Tool，
+                   可以选择替代工具。
+
+                4. 如果缺失数据不是完成任务的必要条件，
+                   应基于已成功获取的数据进行降级分析。
+
+                5. 缺失关键数据时，必须明确说明分析限制。
+                """),
             new UserMessage(userQuery));
 
     return new Prompt(messages, chatOptions);
   }
 
-  private void logToolCalls(int step, ChatResponse response) {
+  private void logToolCalls(int roundNumber, ChatResponse response) {
 
     if (response.getResult() == null) {
       return;
@@ -166,15 +179,14 @@ public class AgentService {
 
     AssistantMessage assistantMessage = response.getResult().getOutput();
 
-    for (AssistantMessage.ToolCall toolCall : assistantMessage.getToolCalls()) {
+    List<AssistantMessage.ToolCall> toolCalls = assistantMessage.getToolCalls();
+    for (int i = 0; i < toolCalls.size(); i++) {
+      AssistantMessage.ToolCall toolCall = toolCalls.get(i);
 
       log.info(
-          """
-              Agent Step: {}
-              Tool:{}
-              Arguments: {}
-              """,
-          step + 1,
+          "Agent Round={}, ToolCallIndex={}, Tool={}, Arguments={}",
+          roundNumber,
+          i + 1,
           toolCall.name(),
           toolCall.arguments());
     }
