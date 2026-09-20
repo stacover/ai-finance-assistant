@@ -42,7 +42,19 @@ public class AgentService {
             .build();
     Prompt prompt = buildInitialPrompt(userQuery, chatOptions);
     for (int i = 0; i < MAX_STEPS; i++) {
-      ChatResponse chatResponse = chatModel.call(prompt);
+      ChatResponse chatResponse;
+      try {
+        chatResponse = chatModel.call(prompt);
+      } catch (Exception e) {
+        log.error("LLM call failed", e);
+        return new AgentRunResult(
+            null,
+            agentTrace,
+            AgentRunStatus.FAILED,
+            AgentStopReason.MODEL_ERROR,
+            i + 1,
+            "模型调用失败，已保留本次执行记录");
+      }
       log.info("===== Agent Round {} =====", i + 1);
       log.info("hasToolCalls = {}", chatResponse.hasToolCalls());
       if (!chatResponse.hasToolCalls()) {
@@ -50,7 +62,13 @@ public class AgentService {
           throw new IllegalStateException("LLM return empty response");
         }
         String answer = chatResponse.getResult().getOutput().getText();
-        return new AgentRunResult(answer, agentTrace);
+        return new AgentRunResult(
+            answer,
+            agentTrace,
+            AgentRunStatus.COMPLETED,
+            AgentStopReason.FINAL_ANSWER,
+            i + 1,
+            null);
       }
       List<AssistantMessage.ToolCall> toolCalls =
           chatResponse.getResult().getOutput().getToolCalls();
@@ -97,7 +115,13 @@ public class AgentService {
       }
       prompt = new Prompt(executionResult.conversationHistory(), chatOptions);
     }
-    throw new IllegalStateException("Agent exceeded max steps: " + MAX_STEPS);
+    return new AgentRunResult(
+        null,
+        agentTrace,
+        AgentRunStatus.INCOMPLETE,
+        AgentStopReason.MAX_STEPS,
+        MAX_STEPS,
+        "已达到模型调用次数上限，本次研究尚未完成，已获取的工具结果保留在 Trace 中");
   }
 
   // 解析只影响 Trace 状态；原始 observation 仍保留供排查和后续模型调用使用。
@@ -126,8 +150,10 @@ public class AgentService {
       case "SUCCESS" -> new ObservationOutcome(StepStatus.SUCCESS, null);
       case "FAILURE" -> {
         JsonNode message = result.path("message");
-        String errorMessage = message.isTextual() && !message.asText().isBlank()
-            ? message.asText() : "工具执行失败，未提供错误说明";
+        String errorMessage =
+            message.isTextual() && !message.asText().isBlank()
+                ? message.asText()
+                : "工具执行失败，未提供错误说明";
         yield new ObservationOutcome(StepStatus.FAILED, errorMessage);
       }
       default -> new ObservationOutcome(StepStatus.FAILED, "未知工具状态：" + status.asText());
